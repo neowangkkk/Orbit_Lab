@@ -8,7 +8,7 @@
 | DNS hosted by | GoDaddy (`ns59` / `ns60.domaincontrol.com`) |
 | `orbitlab.ca` | A → `185.230.63.107` (Wix) |
 | `www.orbitlab.ca` | CNAME → `pointing.wixdns.net` (Wix) |
-| MX / SPF / DMARC | **none** — see the email note at the bottom |
+| MX / SPF / DMARC | **none** — `info@orbitlab.ca` bounces; see [Email Routing](#fixing-it-with-cloudflare-email-routing-free) |
 
 The domain is registered at GoDaddy, *not* through Wix. Wix is only being
 pointed at. So cancelling Wix cannot cost you the domain, and no domain
@@ -130,13 +130,65 @@ roll back to any previous one from the dashboard in one click.
 at all — no mail server, no SPF, no DMARC. Anything sent to that address
 bounces, yet it is printed in the footer of every page and the privacy policy
 directs people there for data-deletion requests. This was already true on the
-Wix site. Options:
+Wix site.
 
-- **Cloudflare Email Routing** (free): once DNS is on Cloudflare, Email → Email
-  Routing → forward `info@orbitlab.ca` to a real inbox. Adds the MX records for
-  you. Forwarding only — you can't *send* from the address.
-- **UofT / iSchool mail**, if the lab can get a real mailbox.
-- Or replace the address on the site with one that works.
+### Fixing it with Cloudflare Email Routing (free)
+
+> **Prerequisite: Step 3 must be done first.** Email Routing writes MX records
+> into the zone, so it only becomes available once `orbitlab.ca` is Active on
+> Cloudflare. It cannot be set up while DNS is still at GoDaddy.
+
+1. Cloudflare dashboard → select **orbitlab.ca** → **Email** → **Email Routing**
+   → **Get started**
+2. **Destination address**: the real inbox that should receive the mail. Cloudflare
+   emails it a verification link — **click it**, or routing silently never starts.
+3. **Custom address**: `info@orbitlab.ca` → **Send to** → your verified destination.
+4. Cloudflare offers to add the required DNS records — accept. It adds three MX
+   records (`route1/2/3.mx.cloudflare.net`) plus an SPF `TXT`.
+5. Toggle **Email Routing** on.
+
+Verify by sending a message to `info@orbitlab.ca` from an unrelated account; it
+should land in the destination inbox within a minute, showing the original sender.
+
+**Consider a catch-all** (Email Routing → Catch-all address) so mail to
+`hello@`, `contact@`, or a mistyped address is not lost.
+
+### The limitation to know about
+
+Email Routing **forwards only — it cannot send**. There is no SMTP server, so
+nobody can reply *from* `info@orbitlab.ca`; replies go out from whichever
+personal inbox received the forward, and the sender sees that address.
+
+For a privacy-policy contact handling data-deletion requests, that is a bit
+awkward. Three ways out:
+
+- **Live with it** — fine for a small lab; just be aware the reply reveals a
+  personal address.
+- **A real mailbox** — if the iSchool will provision one for the lab, use that
+  instead and skip Email Routing entirely.
+- **A paid sender** (Fastmail, Migadu, Google Workspace, ~$3–6/month) if sending
+  from the address genuinely matters.
+
+### While you are in DNS: block spoofing
+
+Nothing sends mail *from* `orbitlab.ca`, and a domain with no policy is easy to
+forge. Once Email Routing has added its SPF record, add a DMARC record too —
+DNS → Records → **TXT**, name `_dmarc`, content:
+
+```
+v=DMARC1; p=reject
+```
+
+`p=reject` tells receiving servers to drop anything forged as `@orbitlab.ca`.
+(You can append `; rua=mailto:info@orbitlab.ca` to receive aggregate reports,
+but they arrive as daily XML attachments and would clutter the forwarded inbox
+— skip it unless you intend to read them.)
+Safe here precisely because the domain has no legitimate outbound mail. If you
+later add a real mailbox or a newsletter tool, revisit this first — it will
+block them too.
+
+**Other options instead of the above:** a UofT / iSchool mailbox, or simply
+replacing the address on the site with one that already works.
 
 **2. Cloudflare Pages limits** (well within range today): 25 MiB per file — the
 largest is `facial-recognition.pdf` at 19 MB, so a bigger PDF later could hit the
