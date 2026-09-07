@@ -228,14 +228,22 @@ body.nav-open .nav-toggle span:nth-child(3) { transform: translateY(-8px) rotate
   gap: clamp(2rem, 5vw, 5rem);
   align-items: center;
 }
-.split__text { grid-column: 1 / span 6; }
-.split__media { grid-column: 8 / span 5; }
-.split--reverse .split__text { grid-column: 7 / span 6; }
+/* Both children are pinned to row 1. Without this, grid auto-placement in the
+   --reverse variant drops the media onto a second row: the text is placed at
+   column 7, which moves the cursor past column 1, and auto-placement never
+   backtracks. */
+.split__text  { grid-column: 1 / span 6; grid-row: 1; }
+.split__media { grid-column: 8 / span 5; grid-row: 1; }
+.split--reverse .split__text  { grid-column: 7 / span 6; }
 .split--reverse .split__media { grid-column: 1 / span 5; }
+
 @media (max-width: 900px) {
   .split__text, .split__media,
-  .split--reverse .split__text, .split--reverse .split__media { grid-column: 1 / -1; }
-  .split--reverse .split__media { grid-row: 1; }
+  .split--reverse .split__text, .split--reverse .split__media {
+    grid-column: 1 / -1;
+    grid-row: auto;          /* release the row pin so they stack */
+  }
+  .split--reverse .split__media { order: -1; }   /* media first when stacked */
 }
 
 .statement {
@@ -251,6 +259,14 @@ body.nav-open .nav-toggle span:nth-child(3) { transform: translateY(-8px) rotate
 .figure:hover img { transform: scale(1.04); }
 .figure--tall { aspect-ratio: 4 / 5; }
 .figure--wide { aspect-ratio: 16 / 10; }
+
+/* Full-width banner under a page heading. Deliberately short so the heading
+   and intro copy keep the upper hand — 16/10 at full container width runs to
+   ~800px tall and swamps the text it is meant to support. */
+.figure--banner {
+  aspect-ratio: 2.4 / 1;
+  max-height: 52vh;
+}
 
 /* ============================================================
    Stats
