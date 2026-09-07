@@ -16,26 +16,48 @@ transfer is needed.
 
 ---
 
-## Step 1 — Put the site on Cloudflare Pages
+## Step 1 — Put the site on Cloudflare
 
-**Option A — drag and drop (no GitHub needed)**
+> **The dashboard changed.** Cloudflare now steers new projects to **Workers**
+> (with static assets) and has hidden the Pages entry point — "Create
+> application" no longer offers a **Pages** choice. Both still work. Option A
+> below is the current recommended path and is what `wrangler.jsonc` in this
+> repo configures.
 
-1. [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages** → **Create** → **Pages** → **Upload assets**
-2. Project name: `orbitlab`
-3. Drag the **`site/`** folder in (the folder itself, so `index.html` sits at the root of the upload)
-4. **Deploy** → you get `https://orbitlab.pages.dev`
+**Option A — Workers + static assets, auto-deploy on `git push` (recommended)**
 
-**Option B — deploy automatically on every `git push`**
+1. Cloudflare → **Workers & Pages** → **Create application** → **Import a repository**
+2. Authorise GitHub, pick `neowangkkk/Orbit_Lab`
+3. Cloudflare reads `wrangler.jsonc` and configures itself — leave the build
+   command **empty**. Do not set an output directory; `wrangler.jsonc` already
+   points at `./site`.
+4. **Deploy** → you get `https://orbitlab.<subdomain>.workers.dev`
 
-1. Push this repo to GitHub (it is already committed locally)
-2. Cloudflare → **Workers & Pages** → **Create** → **Pages** → **Connect to Git** → pick the repo
-3. Build settings:
-   - Framework preset: **None**
-   - Build command: **leave empty**
-   - Build output directory: **`site`**
-4. **Save and Deploy**
+`_headers` and `_redirects` are honoured here exactly as they were on Pages.
 
-Nothing needs compiling — it is plain HTML.
+**Option B — Pages (still available, entry point hidden)**
+
+Deep-link straight to the creation screen — this resolves your account automatically:
+
+```
+https://dash.cloudflare.com/?to=/:account/pages/new
+```
+
+Then **Connect to Git** → pick the repo → build settings:
+
+- Framework preset: **None**
+- Build command: **leave empty**
+- Build output directory: **`site`**
+
+**Option C — command line, no dashboard at all**
+
+```bash
+npx wrangler login     # one-time browser auth
+npx wrangler deploy    # reads wrangler.jsonc, uploads ./site
+```
+
+Nothing needs compiling in any of these — it is plain HTML. Verify the config
+without deploying or logging in with `npx wrangler deploy --dry-run`.
 
 ## Step 2 — Test on the temporary URL *before* touching DNS
 
@@ -68,15 +90,21 @@ stays registered at GoDaddy**; only the nameservers change, and it is free.
 
 > During propagation the site keeps serving from Wix. Nothing breaks.
 
-## Step 4 — Attach the domain to the Pages project
+## Step 4 — Attach the domain to the project
 
-1. Pages project → **Custom domains** → **Set up a custom domain**
-2. Add **`www.orbitlab.ca`**, then add **`orbitlab.ca`**
-3. Cloudflare creates the records itself (CNAME flattening covers the apex)
-4. In **DNS → Records**, delete any leftovers pointing at Wix:
+The menu differs depending on which route you took in Step 1:
+
+- **Workers (Option A):** project → **Settings** → **Domains & Routes** → **Add** → **Custom domain**
+- **Pages (Option B):** project → **Custom domains** → **Set up a custom domain**
+
+Then, either way:
+
+1. Add **`www.orbitlab.ca`**, then add **`orbitlab.ca`**
+2. Cloudflare creates the DNS records itself (CNAME flattening covers the apex)
+3. In **DNS → Records**, delete any leftovers pointing at Wix:
    - `A  orbitlab.ca → 185.230.63.107`
    - `CNAME  www → pointing.wixdns.net`
-5. The HTTPS certificate issues automatically — a few minutes.
+4. The HTTPS certificate issues automatically — a few minutes.
 
 ## Step 5 — Send the apex to `www`
 
@@ -111,16 +139,22 @@ site is re-indexed at the same URLs.
 
 ## Updating the site later
 
-**Option A:** re-drag the `site/` folder into the Pages project (new deployment).
-
-**Option B (if you connected Git):**
+**If you connected Git (Option A or B above)** — the normal case:
 
 ```bash
 git add -A && git commit -m "Update people page" && git push
 ```
 
-Cloudflare rebuilds automatically. Every deployment is kept, and you can
-roll back to any previous one from the dashboard in one click.
+Cloudflare redeploys automatically.
+
+**From the command line instead:**
+
+```bash
+npx wrangler deploy
+```
+
+Either way every deployment is kept, and you can roll back to any previous one
+from the dashboard in a click.
 
 ---
 

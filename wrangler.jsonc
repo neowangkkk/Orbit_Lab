@@ -1,0 +1,17 @@
+{
+  // Static-asset-only Worker — no server code, just the site in ./site
+  // Docs: https://developers.cloudflare.com/workers/static-assets/
+  "name": "orbitlab",
+  "compatibility_date": "2026-09-06",
+
+  "assets": {
+    "directory": "./site",
+
+    // Serve /404.html for unmatched paths (multi-page site, NOT an SPA).
+    "not_found_handling": "404-page",
+
+    // "auto-trailing-slash" resolves /our-vision -> /our-vision/index.html,
+    // which is what keeps the original Wix URLs working.
+    "html_handling": "auto-trailing-slash"
+  }
+}
