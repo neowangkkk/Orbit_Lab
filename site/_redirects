@@ -1,0 +1,7 @@
+# Cloudflare Pages — redirects.
+# Old .html paths (in case anything ever linked to them) -> clean URLs.
+/index.html            /                  301
+/our-vision.html       /our-vision        301
+/people.html           /people            301
+/birth-of-ideas.html   /birth-of-ideas    301
+/privacy-policy.html   /privacy-policy    301
