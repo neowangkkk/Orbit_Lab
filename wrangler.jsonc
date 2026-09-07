@@ -1,8 +1,14 @@
 {
   // Static-asset-only Worker — no server code, just the site in ./site
   // Docs: https://developers.cloudflare.com/workers/static-assets/
-  "name": "orbitlab",
+  // Must match the Worker that the Git integration created, otherwise a CLI
+  // `wrangler deploy` would spin up a SECOND worker instead of updating this one.
+  "name": "orbit-lab",
   "compatibility_date": "2026-09-06",
+
+  // Set explicitly so deploys stop warning that these were defaulted on.
+  "workers_dev": true,
+  "preview_urls": true,
 
   "assets": {
     "directory": "./site",
@@ -10,8 +16,10 @@
     // Serve /404.html for unmatched paths (multi-page site, NOT an SPA).
     "not_found_handling": "404-page",
 
-    // "auto-trailing-slash" resolves /our-vision -> /our-vision/index.html,
-    // which is what keeps the original Wix URLs working.
-    "html_handling": "auto-trailing-slash"
+    // Serve /our-vision directly with no trailing slash. This matches both the
+    // original Wix URLs and the <link rel="canonical"> in every page.
+    // "auto-trailing-slash" would 307 /our-vision -> /our-vision/, costing a
+    // redirect hop and contradicting the canonical tags.
+    "html_handling": "drop-trailing-slash"
   }
 }
