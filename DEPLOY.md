@@ -114,7 +114,8 @@ automatically on the records it creates for the Worker's custom domain.
 
 The menu differs depending on which route you took in Step 1:
 
-- **Workers (Option A):** project → **Settings** → **Domains & Routes** → **Add** → **Custom domain**
+- **Workers (Option A):** project → **Domains** tab (in the top row, between
+  *Observability* and *Access* — it is NOT under Settings) → **Add**
 - **Pages (Option B):** project → **Custom domains** → **Set up a custom domain**
 
 Then, either way:
