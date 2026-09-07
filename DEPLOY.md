@@ -1,4 +1,4 @@
-# Deploying to Cloudflare Pages, replacing the Wix site
+# Deploying to Cloudflare, replacing the Wix site
 
 **Current state (verified 2026-09-06)**
 
@@ -31,7 +31,9 @@ transfer is needed.
 3. Cloudflare reads `wrangler.jsonc` and configures itself — leave the build
    command **empty**. Do not set an output directory; `wrangler.jsonc` already
    points at `./site`.
-4. **Deploy** → you get `https://orbitlab.<subdomain>.workers.dev`
+4. **Deploy** → you get `https://orbit-lab.<your-subdomain>.workers.dev`
+
+   ✅ **Done — live at <https://orbit-lab.180tony.workers.dev>**
 
 `_headers` and `_redirects` are honoured here exactly as they were on Pages.
 
@@ -61,7 +63,11 @@ without deploying or logging in with `npx wrangler deploy --dry-run`.
 
 ## Step 2 — Test on the temporary URL *before* touching DNS
 
-On `https://orbitlab.pages.dev`, check:
+✅ **Done — all checks passed on <https://orbit-lab.180tony.workers.dev>**
+(five pages 200 with no redirect hop, styled 404 returning a real 404 status,
+hero video, all nine headshots, all five PDFs, `_headers` applied.)
+
+On the temporary URL, check:
 
 - [ ] all five pages load: `/`, `/our-vision`, `/people`, `/birth-of-ideas`, `/privacy-policy`
 - [ ] the hero video plays on the homepage
@@ -73,12 +79,15 @@ Fix anything wrong here, while the live site is still safely on Wix.
 
 ## Step 3 — Move DNS hosting to Cloudflare
 
-The apex domain `orbitlab.ca` **cannot** be pointed at Pages with a CNAME while
+The apex domain `orbitlab.ca` **cannot** be pointed at Workers or Pages with a CNAME while
 DNS lives at GoDaddy — plain DNS forbids a CNAME at the apex, and GoDaddy has no
 CNAME flattening. Cloudflare does, so DNS hosting has to move. **The domain
 stays registered at GoDaddy**; only the nameservers change, and it is free.
 
-1. Cloudflare → **Add a site** → `orbitlab.ca` → **Free** plan
+1. Cloudflare → left sidebar **Domains** → **Overview** → **+ Add a domain**
+   → `orbitlab.ca` → **Free** plan
+   (Cloudflare renamed "Websites / Add a site" to **Domains / Add a domain**.
+   Deep link: `https://dash.cloudflare.com/?to=/:account/add-site`)
 2. Cloudflare scans the existing records. There is nothing here worth keeping —
    no mail, no verification TXT, just the two Wix web records, which Step 4
    replaces. If the scan shows anything you don't recognise, stop and check it.
