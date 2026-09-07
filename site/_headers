@@ -6,11 +6,23 @@
   X-Frame-Options: SAMEORIGIN
   Permissions-Policy: geolocation=(), microphone=(), camera=()
 
-# Asset filenames are NOT content-hashed, so we deliberately avoid
-# "immutable" / 1-year caching: replacing a photo in place would otherwise
-# stay stale in visitors' browsers for a year. One week is the compromise.
-/assets/*
+# Media is large and rarely edited in place — cache it for a week.
+/assets/img/*
   Cache-Control: public, max-age=604800, stale-while-revalidate=86400
+/assets/pdf/*
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
+/assets/video/*
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
+
+# CSS and JS must NOT sit in a long cache. They are small, they change with
+# every layout fix, and a week-long max-age means returning visitors keep
+# rendering the old stylesheet without ever asking the server — a layout fix
+# then looks like it "didn't work". no-cache still revalidates against the
+# ETag, so an unchanged file costs a 304, not a re-download.
+/assets/css/*
+  Cache-Control: no-cache
+/assets/js/*
+  Cache-Control: no-cache
 
 # HTML should revalidate so content edits appear immediately.
 /
