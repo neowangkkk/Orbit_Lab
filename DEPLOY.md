@@ -88,14 +88,25 @@ stays registered at GoDaddy**; only the nameservers change, and it is free.
    → `orbitlab.ca` → **Free** plan
    (Cloudflare renamed "Websites / Add a site" to **Domains / Add a domain**.
    Deep link: `https://dash.cloudflare.com/?to=/:account/add-site`)
-2. Cloudflare scans the existing records. There is nothing here worth keeping —
-   no mail, no verification TXT, just the two Wix web records, which Step 4
-   replaces. If the scan shows anything you don't recognise, stop and check it.
-3. Cloudflare shows **two nameservers**. Copy them.
-4. At **GoDaddy** → *My Products* → `orbitlab.ca` → **DNS** → **Nameservers** →
+2. Cloudflare scans the existing records: the two Wix web records (replaced in
+   Step 4) and a GoDaddy `_domainconnect` CNAME. No mail, no verification TXT —
+   nothing worth keeping. If the scan shows anything you don't recognise, stop.
+3. **Set every record to "DNS only" (grey cloud) before continuing.** Cloudflare
+   defaults them all to Proxied (orange), but **Wix does not support sitting
+   behind another proxy** — proxied traffic to Wix tends to fail with SSL
+   handshake errors or redirect loops. That would break the *current* live site
+   during nameserver propagation, before the new one is even switched on.
+   Grey cloud keeps traffic going straight to Wix exactly as it does today.
+4. Scroll down and click **Continue**. The **two nameservers** appear on the
+   *next* screen, not on the DNS review screen. (Later you can always find them
+   again under Domains → `orbitlab.ca` → **Overview**.) Copy them.
+5. At **GoDaddy** → *My Products* → `orbitlab.ca` → **DNS** → **Nameservers** →
    **Change** → **I'll use my own nameservers** → paste Cloudflare's two → save.
-5. Wait for Cloudflare to report the domain **Active** — usually under an hour,
+6. Wait for Cloudflare to report the domain **Active** — usually under an hour,
    occasionally up to 24–48 h.
+
+Step 4 turns proxying back on where it *is* required: Cloudflare enables it
+automatically on the records it creates for the Worker's custom domain.
 
 > During propagation the site keeps serving from Wix. Nothing breaks.
 
